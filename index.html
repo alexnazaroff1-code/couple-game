@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Время для двоих">
+    <meta name="theme-color" content="#764ba2">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>💕 Время для двоих - Игра для пар</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#764ba2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Время для двоих">
+    <meta name="description" content="100 вопросов для более глубокого знакомства. Интерактивная игра для пар.">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Начальный экран */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            flex: 1;
+        }
+        
+        .welcome-screen h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .welcome-screen h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+        
+        .welcome-screen p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.95;
+            max-width: 400px;
+        }
+        
+        .rules {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .rules h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .rules ol {
+            font-size: 16px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        
+        .rules li {
+            margin-bottom: 10px;
+        }
+        
+        .start-button {
+            background: white;
+            color: #764ba2;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .start-button:active {
+            transform: scale(0.95);
+        }
+        
+        .install-hint {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .install-hint strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* Игровой экран */
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .header {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .progress-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Карточка */
+        .card-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: transform 0.3s ease;
+            touch-action: none;
+        }
+        
+        .card.swipe-left {
+            animation: swipeLeft 0.5s ease-out forwards;
+        }
+        
+        .card.swipe-right {
+            animation: swipeRight 0.5s ease-out forwards;
+        }
+        
+        @keyframes swipeLeft {
+            to {
+                transform: translateX(-150%) rotate(-30deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes swipeRight {
+            to {
+                transform: translateX(150%) rotate(30deg);
+                opacity: 0;
+            }
+        }
+        
+        .card-category {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #764ba2;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-question {
+            font-size: 24px;
+            line-height: 1.5;
+            color: #333;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-number {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            margin-top: 20px;
+        }
+        
+        /* Кнопки действий */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .action-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-button:active {
+            transform: scale(0.9);
+        }
+        
+        .skip-button {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .next-button {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .hint {
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+        
+        /* Экран завершения */
+        .finish-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            flex: 1;
+        }
+        
+        .finish-screen h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .finish-screen p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+        
+        .stats {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            min-width: 300px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .restart-button {
+            background: white;
+            color: #764ba2;
+            border: none;
+            padding: 20px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        
+        /* Индикатор свайпа */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            font-size: 100px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+        
+        .swipe-indicator.left {
+            left: 20px;
+            color: #ff6b6b;
+        }
+        
+        .swipe-indicator.right {
+            right: 20px;
+            color: #51cf66;
+        }
+        
+        .swipe-indicator.show {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Начальный экран -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1>💕</h1>
+            <h2>Время для двоих</h2>
+            <p>100 вопросов для более глубокого знакомства</p>
+            
+            <div class="rules">
+                <h3>📱 Как играть:</h3>
+                <ol>
+                    <li><strong>Создайте атмосферу:</strong> Устройтесь поудобнее, налейте чай или вино</li>
+                    <li><strong>По очереди:</strong> Один читает вопрос, второй отвечает</li>
+                    <li><strong>Свайпайте:</strong> ← влево - пропустить, → вправо - следующий</li>
+                    <li><strong>Слушайте:</strong> Будьте честными и внимательными друг к другу</li>
+                    <li><strong>Наслаждайтесь:</strong> Нет правильных ответов, просто будьте собой</li>
+                </ol>
+            </div>
+            
+            <button class="start-button" onclick="startGame()">Начать игру ▶</button>
+            
+            <div class="install-hint">
+                <strong>💡 Совет для iPhone:</strong>
+                Нажмите кнопку "Поделиться" внизу Safari и выберите "На экран «Домой»" - игра установится как приложение!
+            </div>
+        </div>
+        
+        <!-- Игровой экран -->
+        <div class="game-screen" id="gameScreen">
+            <div class="header">
+                <div class="progress">
+                    <span class="progress-text" id="progressText">1 / 100</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            
+            <div class="card-container">
+                <div class="swipe-indicator left" id="swipeLeft">✗</div>
+                <div class="swipe-indicator right" id="swipeRight">✓</div>
+                
+                <div class="card" id="card">
+                    <div class="card-category" id="category"></div>
+                    <div class="card-question" id="question"></div>
+                    <div class="card-number" id="cardNumber"></div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="action-button skip-button" onclick="skipCard()">✗</button>
+                <button class="action-button next-button" onclick="nextCard()">✓</button>
+            </div>
+            
+            <div class="hint">👆 Нажмите на кнопку или смахните карточку</div>
+        </div>
+        
+        <!-- Экран завершения -->
+        <div class="finish-screen" id="finishScreen">
+            <h2>🎉 Поздравляем!</h2>
+            <p>Вы прошли все 100 вопросов вместе!</p>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span>Отвечено:</span>
+                    <span class="stat-value" id="answeredCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Пропущено:</span>
+                    <span class="stat-value" id="skippedCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Время вместе:</span>
+                    <span class="stat-value" id="timeSpent">0 мин</span>
+                </div>
+            </div>
+            
+            <p>Надеемся, вы стали ближе друг к другу! ❤️</p>
+            
+            <button class="restart-button" onclick="restartGame()">Начать заново</button>
+        </div>
+    </div>
+    
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+        
+        const questions = [
+            { category: "Прошлое", question: "Какой момент из твоего детства ты считаешь самым счастливым? Почему именно он?" },
+            { category: "Мечты", question: "Если бы у нас было неограниченное количество денег и времени, как бы выглядел твой идеальный год?" },
+            { category: "Отношения", question: "Что я делаю, что заставляет тебя чувствовать себя по-настоящему любимым/любимой?" },
+            { category: "Ценности", question: "Какая черта характера для тебя важнее всего в близких людях?" },
+            { category: "Настоящее", question: "За что ты благодарен/благодарна в нашей жизни прямо сейчас?" },
+            { category: "Глубокое", question: "Какой твой самый большой страх в отношениях? Откуда он, как ты думаешь?" },
+            { category: "Воспоминания", question: "Какой момент в наших отношениях ты бы хотел/хотела пережить заново?" },
+            { category: "Будущее", question: "Каким ты видишь нас через 10 лет? Опиши обычный день из нашей будущей жизни." },
+            { category: "Интимность", question: "Когда ты чувствуешь наибольшую близость со мной? Что создает это ощущение?" },
+            { category: "Саморазвитие", question: "В какой области жизни ты хотел/хотела бы вырасти? Как я могу тебя поддержать?" },
+            { category: "Семья", question: "Какую традицию из твоей семьи ты бы хотел/хотела сохранить в нашей?" },
+            { category: "Эмоции", question: "Как ты предпочитаешь, чтобы тебя утешали, когда тебе грустно или тревожно?" },
+            { category: "Приключения", question: "Какое совместное приключение ты мечтаешь пережить с нами?" },
+            { category: "Конфликты", question: "Что помогает тебе быстрее прийти в себя после ссоры?" },
+            { category: "Увлечения", question: "Есть ли хобби или занятие, которым ты хотел/хотела бы заниматься вместе со мной?" },
+            { category: "Прошлое", question: "Какой урок из твоих прошлых отношений помог тебе стать лучше в наших?" },
+            { category: "Доверие", question: "Что для тебя означает доверие в отношениях? Как я могу укреплять его?" },
+            { category: "Романтика", question: "Опиши свой идеальный романтический вечер в деталях." },
+            { category: "Мечты", question: "Если бы ты мог/могла на год стать кем угодно, кем бы ты стал/стала и почему?" },
+            { category: "Благодарность", question: "За какую мою черту характера ты благодарен/благодарна больше всего?" },
+            { category: "Креативность", question: "Если бы мы писали книгу о наших отношениях, как бы называлась самая яркая глава?" },
+            { category: "Дружба", question: "Что для тебя значит быть не только партнером, но и лучшим другом?" },
+            { category: "Рост", question: "Как, по-твоему, наши отношения изменили тебя к лучшему?" },
+            { category: "Потребности", question: "Что мне важно знать о твоих эмоциональных потребностях?" },
+            { category: "Веселье", question: "Какой наш совместный момент заставляет тебя смеяться до сих пор?" },
+            { category: "Духовность", question: "Что для тебя значит духовная близость? Чувствуешь ли ты ее с нами?" },
+            { category: "Дом", question: "Как выглядит дом твоей мечты? Что создает для тебя ощущение уюта?" },
+            { category: "Вызовы", question: "Какое испытание мы преодолели вместе, которым ты гордишься?" },
+            { category: "Сюрпризы", question: "Что я сделал/сделала для тебя, что по-настоящему удивило и тронуло?" },
+            { category: "Поддержка", question: "В какой момент ты почувствовал/почувствовала, что я действительно здесь для тебя?" },
+            { category: "Страсть", question: "Что сохраняет искру между нами живой? Что мы можем добавить?" },
+            { category: "Традиции", question: "Какую новую традицию ты бы хотел/хотела создать только для нас двоих?" },
+            { category: "Признательность", question: "Какие мелочи, которые я делаю каждый день, ты особенно ценишь?" },
+            { category: "Мудрость", question: "Какой совет об отношениях ты дал/дала бы нам в начале нашего пути?" },
+            { category: "Красота", question: "Что в наших отношениях ты находишь самым красивым?" },
+            { category: "Границы", question: "Есть ли что-то, о чем тебе важно, чтобы я знал/знала как о твоей личной границе?" },
+            { category: "Путешествия", question: "Если бы мы могли уехать завтра куда угодно на месяц, куда бы мы поехали?" },
+            { category: "Ностальгия", question: "Какой момент из нашего знакомства тебе вспоминается с особой теплотой?" },
+            { category: "Надежды", question: "Какие надежды у тебя есть для нас как пары на ближайший год?" },
+            { category: "Уязвимость", question: "Когда тебе легче всего быть уязвимым/уязвимой со мной?" },
+            { category: "Вдохновение", question: "Чем я вдохновляю тебя? Как это проявляется в твоей жизни?" },
+            { category: "Комфорт", question: "Что я могу сделать, чтобы ты чувствовал/чувствовала себя более комфортно в трудные дни?" },
+            { category: "Радость", question: "Какое простое занятие вместе со мной приносит тебе больше всего радости?" },
+            { category: "Личность", question: "Какая моя привычка или особенность тебя больше всего умиляет?" },
+            { category: "Мечты", question: "Есть ли что-то, что ты всегда мечтал/мечтала сделать, но пока не решался/решалась?" },
+            { category: "Открытость", question: "О чем тебе хочется поговорить со мной чаще?" },
+            { category: "Наследие", question: "Какое наследие мы хотим оставить как пара?" },
+            { category: "Сильные стороны", question: "В чем, по-твоему, наша главная сила как пары?" },
+            { category: "Гордость", question: "Чем в наших отношениях ты гордишься больше всего?" },
+            { category: "Любовь", question: "Закончи фразу: 'Я люблю тебя больше всего, когда ты...'" },
+            { category: "Детство", question: "Какую детскую мечту ты до сих пор носишь в сердце?" },
+            { category: "Смелость", question: "Когда ты видел/видела меня смелым/смелой? Что ты тогда чувствовал/чувствовала?" },
+            { category: "Тайны", question: "Есть ли что-то, чем ты никогда ни с кем не делился/делилась, но хотел/хотела бы рассказать мне?" },
+            { category: "Изменения", question: "Что ты хотел/хотела бы изменить в нашей повседневной жизни?" },
+            { category: "Успех", question: "Какое мое достижение заставляет тебя гордиться мной больше всего?" },
+            { category: "Музыка", question: "Какая песня или музыка напоминает тебе о нас?" },
+            { category: "Нежность", question: "Как ты любишь, чтобы я проявлял/проявляла к тебе нежность?" },
+            { category: "Сожаления", question: "Есть ли что-то, о чем ты жалеешь в наших отношениях? Как мы можем это исправить?" },
+            { category: "Восхищение", question: "Чем во мне ты восхищаешься, но редко говоришь об этом?" },
+            { category: "Вечность", question: "Если бы мы могли остановить одно мгновение навсегда, какое бы ты выбрал/выбрала?" },
+            { category: "Юмор", question: "Что в моем чувстве юмора заставляет тебя улыбаться?" },
+            { category: "Безопасность", question: "Что заставляет тебя чувствовать себя в безопасности со мной?" },
+            { category: "Мудрость", question: "Какой жизненный урок ты хотел/хотела бы передать нашим детям или близким?" },
+            { category: "Креативность", question: "Если бы мы создавали фильм о нашей любви, какой бы была ключевая сцена?" },
+            { category: "Забота", question: "Как я могу лучше заботиться о тебе, когда ты устал/устала?" },
+            { category: "Спонтанность", question: "Какой самый спонтанный поступок ты хотел/хотела бы совершить вместе со мной?" },
+            { category: "Мечты", question: "О чем ты мечтаешь перед сном?" },
+            { category: "Слабости", question: "В какой момент ты чувствуешь себя наиболее уязвимым/уязвимой? Как я могу помочь?" },
+            { category: "Свобода", question: "Что для тебя означает свобода в отношениях?" },
+            { category: "Комплименты", question: "Какой комплимент от меня запомнился тебе больше всего?" },
+            { category: "Ритуалы", question: "Какой наш ежедневный ритуал тебе дороже всего?" },
+            { category: "Прощение", question: "Что помогает тебе прощать? Как я могу просить прощения лучше?" },
+            { category: "Сюрпризы", question: "Какой сюрприз ты мечтаешь получить от меня?" },
+            { category: "Природа", question: "Какое место на природе ассоциируется у тебя с нашими отношениями?" },
+            { category: "Кулинария", question: "Какое блюдо, приготовленное мной, тебе запомнилось больше всего?" },
+            { category: "Общение", question: "Когда тебе легче всего со мной разговаривать? Утром, днем или вечером?" },
+            { category: "Друзья", question: "Что тебе нравится в том, как мы проводим время с нашими друзьями?" },
+            { category: "Достижения", question: "Какую нашу общую цель ты хотел/хотела бы достичь в следующем году?" },
+            { category: "Чувства", question: "Какие эмоции во мне ты читаешь лучше всего? Как ты это делаешь?" },
+            { category: "Вера", question: "Во что ты веришь больше всего в наших отношениях?" },
+            { category: "Искусство", question: "Какое произведение искусства (фильм, книга, картина) отражает наши отношения?" },
+            { category: "Привычки", question: "Какую мою привычку ты находишь милой, даже если она немного странная?" },
+            { category: "Энергия", question: "Что дает тебе энергию в наших отношениях?" },
+            { category: "Тишина", question: "Нравится ли тебе молчать вместе со мной? Что ты чувствуешь в эти моменты?" },
+            { category: "Подарки", question: "Какой подарок от меня был самым значимым? Почему?" },
+            { category: "Время", question: "Если бы у нас был один дополнительный час каждый день только для нас, как бы ты хотел/хотела его проводить?" },
+            { category: "Мечты", question: "Какую безумную мечту ты хотел/хотела бы осуществить вместе со мной?" },
+            { category: "Старость", question: "Каким ты видишь нас в старости? О чем мы будем вспоминать?" },
+            { category: "Понимание", question: "Когда ты почувствовал/почувствовала, что я действительно тебя понимаю?" },
+            { category: "Интуиция", question: "Был ли момент, когда ты интуитивно почувствовал/почувствовала что-то обо мне, и это оказалось правдой?" },
+            { category: "Жертвы", question: "Чем ты готов/готова пожертвовать ради наших отношений?" },
+            { category: "Гармония", question: "Что создает гармонию между нами?" },
+            { category: "Волшебство", question: "Какой момент в наших отношениях показался тебе по-настоящему волшебным?" },
+            { category: "Защита", question: "Когда ты чувствуешь желание защищать меня? Что вызывает это чувство?" },
+            { category: "Уникальность", question: "Что делает наши отношения особенными и не похожими на другие?" },
+            { category: "Обещания", question: "Какое обещание ты хотел/хотела бы дать мне прямо сейчас?" },
+            { category: "Вечность", question: "Если бы у нас была только одна ночь вместе, как бы ты хотел/хотела ее провести?" },
+            { category: "Благословение", question: "За что в наших отношениях ты чувствуешь особую благодарность судьбе?" },
+            { category: "Финал", question: "Что ты хочешь, чтобы я знал/знала о твоих чувствах прямо сейчас?" }
+        ];
+        
+        let currentIndex = 0;
+        let answeredCount = 0;
+        let skippedCount = 0;
+        let startTime = null;
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isDragging = false;
+        
+        const card = document.getElementById('card');
+        const swipeLeftIndicator = document.getElementById('swipeLeft');
+        const swipeRightIndicator = document.getElementById('swipeRight');
+        
+        function startGame() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            startTime = new Date();
+            loadQuestion();
+        }
+        
+        function loadQuestion() {
+            if (currentIndex >= questions.length) {
+                showFinishScreen();
+                return;
+            }
+            
+            const q = questions[currentIndex];
+            document.getElementById('category').textContent = q.category;
+            document.getElementById('question').textContent = q.question;
+            document.getElementById('cardNumber').textContent = `Вопрос ${currentIndex + 1} из ${questions.length}`;
+            document.getElementById('progressText').textContent = `${currentIndex + 1} / ${questions.length}`;
+            document.getElementById('progressBar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+        }
+        
+        function nextCard() {
+            answeredCount++;
+            animateCard('right');
+        }
+        
+        function skipCard() {
+            skippedCount++;
+            animateCard('left');
+        }
+        
+        function animateCard(direction) {
+            card.classList.add(`swipe-${direction}`);
+            setTimeout(() => {
+                card.classList.remove(`swipe-${direction}`);
+                currentIndex++;
+                loadQuestion();
+            }, 500);
+        }
+        
+        function showFinishScreen() {
+            const endTime = new Date();
+            const timeSpent = Math.round((endTime - startTime) / 60000);
+            
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('finishScreen').style.display = 'flex';
+            document.getElementById('answeredCount').textContent = answeredCount;
+            document.getElementById('skippedCount').textContent = skippedCount;
+            document.getElementById('timeSpent').textContent = `${timeSpent} мин`;
+        }
+        
+        function restartGame() {
+            currentIndex = 0;
+            answeredCount = 0;
+            skippedCount = 0;
+            document.getElementById('finishScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'flex';
+        }
+        
+        // Touch events для свайпа
+        card.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            isDragging = true;
+        });
+        
+        card.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchEndX - touchStartX;
+            
+            card.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
+            
+            if (diff < -50) {
+                swipeLeftIndicator.classList.add('show');
+                swipeRightIndicator.classList.remove('show');
+            } else if (diff > 50) {
+                swipeRightIndicator.classList.add('show');
+                swipeLeftIndicator.classList.remove('show');
+            } else {
+                swipeLeftIndicator.classList.remove('show');
+                swipeRightIndicator.classList.remove('show');
+            }
+        });
+        
+        card.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            const diff = touchEndX - touchStartX;
+            
+            swipeLeftIndicator.classList.remove('show');
+            swipeRightIndicator.classList.remove('show');
+            
+            if (diff < -100) {
+                skipCard();
+            } else if (diff > 100) {
+                nextCard();
+            } else {
+                card.style.transform = '';
+            }
+        });
+        
+        // Клавиатура для десктопа
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('gameScreen').style.display !== 'flex') return;
+            
+            if (e.key === 'ArrowLeft') {
+                skipCard();
+            } else if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                nextCard();
+            }
+        });
+        
+        // Регистрация Service Worker для PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered: ', registration);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
